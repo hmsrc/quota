@@ -42,6 +42,7 @@ def print_quota(cluster, fs_path, ids, cursor):
         qtn.id AS id,
         qtn.name AS name,
         qc.logical_usage AS "usage",
+        qc.physical_usage AS "limit",
         qc.advisory_limit AS advisory,
         qc.hard_limit AS hard,
         qc.inherited AS "default",
@@ -70,17 +71,22 @@ def print_quota(cluster, fs_path, ids, cursor):
         data = cursor.fetchone()
 
         if data:
-            #print data
-            if data[5]:
+#            print data
+            
+            if data[5]: # this is logical_usage, i.e. usage
                 data_usage = sizeof_fmt(data[5])
             else:
                 data_usage = "NA"
 
-            if data[7]:
-                data_quota = sizeof_fmt(data[7])
+            data_quota = "NA"
+            
+            if cluster == 'itisimdcp05':
+                if data[6]: # this is physical_usage, i.e. limit
+                    data_quota = sizeof_fmt(data[6])
             else:
-                data_quota = "NA"
-
+                if data[8]: # this is the hard_limit, i.e. hard
+                    data_quota = sizeof_fmt(data[8])
+            
             print '   %s\t%s\t%s' % (id_disp[0:20].ljust(21), data_usage.rjust(10), data_quota.rjust(10))
 
     print
